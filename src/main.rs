@@ -1,42 +1,24 @@
 use yew::prelude::*;
 
-enum Msg {
-    AddOne
-}
-
-struct CounterComponent {
-    count: i64,
-}
-
-impl Component for CounterComponent {
-    type Message = Msg;
-    type Properties = ();
-
-    fn create(_ctx: &Context<Self>) -> Self {
-        Self { count: 0 }
-    }
-
-    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
-        match msg {
-            Msg::AddOne => {
-                self.count +=1;
-                true // re-render component
-            }
+#[function_component]
+fn App() -> Html {
+    let counter = use_state(|| 0);
+    let onclick = {
+        let counter = counter.clone();
+        move |_| {
+            let value = *counter + 1;
+            counter.set(value);
         }
-    }
+    };
 
-    fn view(&self, ctx: &Context<Self>) -> Html {
-        let link = ctx.link();
-        html! {
-            <div class="container">
-                <p>{ self.count }</p>
-                <button onclick={link.callback(|_| Msg::AddOne)} >{ "+1" }</button>
-            </div>
-        }
+    html! {
+        <div>
+            <button {onclick}>{ "+1" }</button>
+            <p>{ *counter }</p>
+        </div>
     }
 }
-
 
 fn main() {
-    yew::start_app::<CounterComponent>();
+    yew::Renderer::<App>::new().render();
 }
