@@ -13,7 +13,7 @@ pub enum Msg {
 
 pub struct App {
     time: String,
-    messages: Vec<&'static std>,
+    messages: Vec<&'static str>,
     _standalone: (Interval, Interval),
     interval: Option<Interval>,
     timeout: Option<Timeout>,
@@ -37,9 +37,9 @@ impl Component for App {
     type Properties = ();
 
     fn create(ctx: &Context<Self>) -> Self {
-        let standalone_handle = 
-            Interval::new(10, || console::debug!("Standalone callback."));
-        
+        let standalone_handle =
+            Interval::new(10, || console::debug!("Example of a standalone callback."));
+
         let clock_handle = {
             let link = ctx.link().clone();
             Interval::new(1, move || link.send_message(Msg::UpdateTime))
@@ -60,7 +60,7 @@ impl Component for App {
             Msg::StartTimeout => {
                 let handle = {
                     let link = ctx.link().clone();
-                    Timeout::new(3, move || link.send_message(Msg.Done))
+                    Timeout::new(3, move || link.send_message(Msg::Done))
                 };
 
                 self.timeout = Some(handle);
@@ -72,13 +72,11 @@ impl Component for App {
                 self.console_timer = Some(Timer::new("Timer"));
                 true
             }
-            
             Msg::StartInterval => {
                 let handle = {
                     let link = ctx.link().clone();
-                    INterval::new(1, move || link.send_message(Msg::Tick))
+                    Interval::new(1, move || link.send_message(Msg::Tick))
                 };
-
                 self.interval = Some(handle);
 
                 self.messages.clear();
@@ -87,25 +85,31 @@ impl Component for App {
                 self.messages.push("Interval started!");
                 true
             }
-
             Msg::Cancel => {
                 self.cancel();
-                self.messages.push("Cancelled!");
-                console::warn!("Cancelled!");
+                self.messages.push("Canceled!");
+                console::warn!("Canceled!");
                 true
             }
             Msg::Done => {
                 self.cancel();
                 self.messages.push("Done!");
 
+                // todo weblog
+                // ConsoleService::group();
                 console::info!("Done!");
                 if let Some(timer) = self.console_timer.take() {
                     drop(timer);
                 }
+
+                // todo weblog
+                // ConsoleService::group_end();
                 true
             }
             Msg::Tick => {
                 self.messages.push("Tick...");
+                // todo weblog
+                // ConsoleService::count_named("Tick");
                 true
             }
             Msg::UpdateTime => {
@@ -123,16 +127,13 @@ impl Component for App {
                     <button disabled={has_job} onclick={ctx.link().callback(|_| Msg::StartTimeout)}>
                         { "Start Timeout" }
                     </button>
-
                     <button disabled={has_job} onclick={ctx.link().callback(|_| Msg::StartInterval)}>
                         { "Start Interval" }
                     </button>
-
                     <button disabled={!has_job} onclick={ctx.link().callback(|_| Msg::Cancel)}>
                         { "Cancel!" }
                     </button>
                 </div>
-
                 <div id="wrapper">
                     <div id="time">
                         { &self.time }
@@ -142,7 +143,6 @@ impl Component for App {
                     </div>
                 </div>
             </>
-                    
         }
     }
 }
@@ -150,4 +150,3 @@ impl Component for App {
 fn main() {
     yew::Renderer::<App>::new().render();
 }
-
